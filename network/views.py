@@ -1,8 +1,11 @@
+import json
+
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Post
 
@@ -69,3 +72,20 @@ def fetch_posts(request):
     all_posts = Post.objects.all()
     all_posts.order_by("timestamp").all()
     return JsonResponse([post.serialize() for post in all_posts], safe=False)
+
+
+@csrf_exempt
+def update_posts(request, post_id):
+    try:
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "post not found"}, status=404)
+
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        if data.get('likes') is not None and data.get('likes'):
+            post.likes_users.add(request.user)
+        elif data.get('unlikes') is not None and data.get('unlikes'):
+            post.likes_users.remove(request.user)
+        post.save()
+        return HttpResponse(status=204)

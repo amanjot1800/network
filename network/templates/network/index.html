@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
 
@@ -13,9 +14,12 @@
         </div>
     </div>
 
-    <button id="test">Hell</button>
-
     <div id="posts-view">
     </div>
 
+{% endblock %}
+
+{% block script %}
+    {{ request.user.username|json_script:"current_user" }}
+    <script src='{% static '/network/main.js' %}'></script>
 {% endblock %}

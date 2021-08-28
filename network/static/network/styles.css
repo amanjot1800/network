@@ -2,13 +2,10 @@
     padding: 15px;
 }
 
-.create-post {
-    padding: 20px;
-    border: 1px solid lightgray;
-    border-radius: 3px;
+.card {
+    margin: 5px 0;
 }
 
-#post-text {
-    width: 100%;
-    height: 10ch;
+.card-timestamp {
+    color: gray;
 }
