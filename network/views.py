@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -13,6 +14,26 @@ from .models import User, Post
 def index(request):
     return render(request, "network/index.html", {
         "title": "All posts",
+    })
+
+
+@csrf_exempt
+def profile(request, username):
+
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        ruser = data.get("start_following")
+        u = User.objects.get(username=username).following.add(User.objects.get(username=ruser))
+        u.save()
+        return HttpResponse(status=204)
+
+    following = False
+    if request.user in User.objects.get(username=username).followers.all():
+        following = True
+
+    return render(request, "network/profile.html", {
+        "puser": User.objects.get(username=username),
+        "following": "Unfollow" if following else "Follow",
     })
 
 
@@ -68,10 +89,26 @@ def register(request):
         return render(request, "network/register.html")
 
 
+@csrf_exempt
 def fetch_posts(request):
     all_posts = Post.objects.all()
-    all_posts.order_by("timestamp").all()
+    all_posts = all_posts.order_by("-timestamp").all()
     return JsonResponse([post.serialize() for post in all_posts], safe=False)
+
+
+@login_required
+@csrf_exempt
+def create_posts(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    data = json.loads(request.body)
+    post_text = data.get('text')
+
+    new_post = Post(user=request.user, body=post_text)
+    new_post.save()
+
+    return JsonResponse({"message": "Post created successfully"}, status=201)
 
 
 @csrf_exempt

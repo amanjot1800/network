@@ -3,7 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    fullname = models.CharField(max_length=64, blank=True)
+    following = models.ManyToManyField("User", related_name="followers", default=0, blank=True)
 
 
 class Post(models.Model):

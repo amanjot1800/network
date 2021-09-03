@@ -5,14 +5,18 @@
 
     <h1>{{ title }}</h1>
 
-    <div class="card">
+    {% if user.is_authenticated %}
+    <div class="card create-post">
         <div class="card-body">
             <h3 class="card-title">New Post</h3>
             <textarea id="post-text" aria-label="Post"></textarea>
             <br>
-            <input id="submit-button" type="submit" value="Post" class="btn btn-primary">
+            <input id="post-submit-button" type="submit" value="Post" class="btn btn-primary">
         </div>
     </div>
+    {% else %}
+    <div> Login to add posts. </div>
+    {% endif %}
 
     <div id="posts-view">
     </div>

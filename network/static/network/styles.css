@@ -6,6 +6,16 @@
     margin: 5px 0;
 }
 
+
+img {
+    border-radius: 50%;
+}
+
+textarea {
+    width: 50%;
+    height: 100px;
+}
+
 .card-timestamp {
     color: gray;
 }
