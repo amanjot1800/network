@@ -96,6 +96,13 @@ def fetch_posts(request):
     return JsonResponse([post.serialize() for post in all_posts], safe=False)
 
 
+@csrf_exempt
+def fetch_user_posts(request, user):
+    posts = Post.objects.filter(user=User.objects.get(username=user))
+    posts = posts.order_by("-timestamp").all()
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
 @login_required
 @csrf_exempt
 def create_posts(request):
