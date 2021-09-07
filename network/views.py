@@ -21,9 +21,14 @@ def index(request):
 def profile(request, username):
 
     if request.method == 'PUT':
-        data = json.loads(request.body)
-        ruser = data.get("start_following")
-        u = User.objects.get(username=username).following.add(User.objects.get(username=ruser))
+
+        u = User.objects.get(username=request.user.username)
+        pr_user = User.objects.get(username=username)
+
+        if u in pr_user.followers.all():
+            u.following.remove(pr_user)
+        else:
+            u.following.add(pr_user)
         u.save()
         return HttpResponse(status=204)
 
@@ -133,3 +138,27 @@ def update_posts(request, post_id):
             post.likes_users.remove(request.user)
         post.save()
         return HttpResponse(status=204)
+
+
+@login_required
+@csrf_exempt
+def following_posts(request):
+
+    u = User.objects.get(username=request.user.username)
+    following_users = u.following.all()
+    posts = []
+
+    for user in following_users:
+        for post in user.posts.all():
+            posts.append(post)
+
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
+def following_posts_page(request):
+    return render(request, "network/followingposts.html")
+
+
+
+
+

@@ -5,8 +5,13 @@ window.onpopstate = function (event) {
 document.addEventListener('DOMContentLoaded', function () {
 
     if (window.location.pathname.match(/^[\/][{p}][\/][\w]*$/)) {
-        //document.getElementById("follow").onclick = () => follow();
-        fetch_posts("")
+
+        const followb = document.getElementById("follow");
+        if (followb != null) followb.onclick = () => follow();
+        fetch_posts("user")
+
+    } else if (window.location.pathname === '/followingposts') {
+        fetch_posts("following")
     } else {
         fetch_posts("all");
         document.getElementById("post-submit-button").onclick = () => make_posts();
@@ -16,22 +21,14 @@ document.addEventListener('DOMContentLoaded', function () {
 function follow() {
 
     const puser = document.getElementById("follow").dataset.puser;
-    const ruser = document.getElementById("follow").dataset.ruser;
 
     fetch(`/p/${puser}`, {
         method: 'PUT',
         body: JSON.stringify({
-            "start_following": ruser,
+            "start_following": "ruser",
         }),
-    }).then(response => response.json())
-        .then(result => {
-            document.getElementById("follow").innerHTML = "Following";
-            if (result.error !== undefined) {
-                alert(result.error);
-            }
-        })
+    }).then(r => window.location.reload())
 }
-
 
 function fetch_posts(who) {
 
@@ -40,6 +37,15 @@ function fetch_posts(who) {
     if (who==="all") {
         fetch(`/posts`)
             .then(response => response.json())
+            .then(posts => {
+                posts.forEach(post => {
+                    populate_dom(post)
+                })
+            })
+    } else if (who==='following') {
+
+        fetch(`/followingusersposts`)
+            .then(r => r.json())
             .then(posts => {
                 posts.forEach(post => {
                     populate_dom(post)
@@ -85,7 +91,7 @@ function populate_dom(post) {
                 body: JSON.stringify({
                     "unlikes": true,
                 })
-            }).then(() => fetch_posts(""))
+            }).then(() => fetch_posts("all"))
         })
     } else {
         card_like_image.setAttribute('src', '../../static/network/heartu.png');
@@ -95,7 +101,7 @@ function populate_dom(post) {
                 body: JSON.stringify({
                     "likes": true,
                 })
-            }).then(() => fetch_posts(""))
+            }).then(() => fetch_posts("all"))
         })
     }
 
