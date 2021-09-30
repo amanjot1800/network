@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch_posts("all");
         document.getElementById("post-submit-button").onclick = () => make_posts();
     }
+
+    like_unlike();
+
 });
 
 function follow() {
@@ -62,6 +65,23 @@ function fetch_posts(who) {
     }
 }
 
+
+function like_unlike() {
+
+    const like_buttons = document.getElementsByClassName('like_button');
+
+    for (let button of like_buttons) {
+        button.addEventListener('click', () => {
+            fetch(`/posts/${post['id']}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    "likes": true,
+                })
+            })
+        })
+    }
+}
+
 function populate_dom(post) {
     const card_body = document.createElement('div');
     card_body.setAttribute('class', 'card-body');
@@ -72,7 +92,6 @@ function populate_dom(post) {
     card_title.innerHTML = post['user'];
     const card_title_link = document.createElement('h3').appendChild(card_title);
 
-
     const card_text = document.createElement('p');
     card_text.setAttribute('class', 'card-text');
     card_text.innerHTML = post['body'];
@@ -82,27 +101,12 @@ function populate_dom(post) {
     card_timestamp.innerHTML = post['timestamp'];
 
     const card_like_image = document.createElement('img');
+    card_like_image.setAttribute('class', 'like_button');
 
     if (post['likes_users'].includes(JSON.parse(document.getElementById('current_user').textContent))) {
         card_like_image.setAttribute('src', '../../static/network/heart.png');
-        card_like_image.addEventListener('click', () => {
-            fetch(`/posts/${post['id']}`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    "unlikes": true,
-                })
-            }).then(() => fetch_posts("all"))
-        })
     } else {
         card_like_image.setAttribute('src', '../../static/network/heartu.png');
-        card_like_image.addEventListener('click', () => {
-            fetch(`/posts/${post['id']}`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    "likes": true,
-                })
-            }).then(() => fetch_posts("all"))
-        })
     }
 
     const card_like_count = document.createElement('span');
@@ -117,6 +121,8 @@ function populate_dom(post) {
 
     const card = document.createElement('div');
     card.setAttribute('class', 'card');
+    card.setAttribute('id', "post_" + post['id'])
+
     card.appendChild(card_body);
 
     document.getElementById('posts-view').appendChild(card);

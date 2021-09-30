@@ -124,20 +124,22 @@ def create_posts(request):
 
 
 @csrf_exempt
-def update_posts(request, post_id):
+def update_likes(request, post_id):
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "post not found"}, status=404)
 
-    if request.method == "PUT":
-        data = json.loads(request.body)
-        if data.get('likes') is not None and data.get('likes'):
-            post.likes_users.add(request.user)
-        elif data.get('unlikes') is not None and data.get('unlikes'):
+    if request.method == "PUT" and json.loads(request.body).get('likes'):
+        liked = None
+        if request.user in post.likes_users.all():
             post.likes_users.remove(request.user)
+            liked = False
+        else:
+            post.likes_users.add(request.user)
+            liked = True
         post.save()
-        return HttpResponse(status=204)
+        return HttpResponse(liked, status=204)
 
 
 @login_required
