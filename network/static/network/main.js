@@ -17,8 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("post-submit-button").onclick = () => make_posts();
     }
 
-    like_unlike();
-
 });
 
 function follow() {
@@ -42,7 +40,8 @@ function fetch_posts(who) {
             .then(response => response.json())
             .then(posts => {
                 posts.forEach(post => {
-                    populate_dom(post)
+                    populate_dom(post);
+                    like_unlike();
                 })
             })
     } else if (who==='following') {
@@ -51,7 +50,8 @@ function fetch_posts(who) {
             .then(r => r.json())
             .then(posts => {
                 posts.forEach(post => {
-                    populate_dom(post)
+                    populate_dom(post);
+                    like_unlike();
                 })
             })
     } else {
@@ -59,7 +59,8 @@ function fetch_posts(who) {
             .then(response => response.json())
             .then(posts => {
                 posts.forEach(post => {
-                    populate_dom(post)
+                    populate_dom(post);
+                    like_unlike();
                 })
             })
     }
@@ -71,13 +72,16 @@ function like_unlike() {
     const like_buttons = document.getElementsByClassName('like_button');
 
     for (let button of like_buttons) {
+
+        const id = button.parentElement.parentElement.parentElement.id;
         button.addEventListener('click', () => {
-            fetch(`/posts/${post['id']}`, {
+            fetch(`/posts/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     "likes": true,
                 })
-            })
+            });
+            //button.parentElement.
         })
     }
 }
@@ -121,7 +125,7 @@ function populate_dom(post) {
 
     const card = document.createElement('div');
     card.setAttribute('class', 'card');
-    card.setAttribute('id', "post_" + post['id'])
+    card.setAttribute('id', post['id'])
 
     card.appendChild(card_body);
 
